@@ -8,6 +8,7 @@ import { UnknownBackboneType } from '../structure/structure-constants'
 
 import Structure from '../structure/structure'
 import Selection from '../selection/selection'
+import Entity from '../structure/entity'
 
 import ChainStore from '../store/chain-store'
 import ResidueStore from '../store/residue-store'
@@ -15,6 +16,7 @@ import ResidueStore from '../store/residue-store'
 import Polymer from '../proxy/polymer'
 import ResidueProxy from '../proxy/residue-proxy'
 import AtomProxy from '../proxy/atom-proxy'
+import ModelProxy from '../proxy/model-proxy'
 
 /**
  * Chain proxy

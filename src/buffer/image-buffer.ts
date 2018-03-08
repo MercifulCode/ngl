@@ -6,7 +6,8 @@
 
 import {
     Vector2, BufferAttribute, DataTexture,
-    NormalBlending, NearestFilter, LinearFilter
+    NormalBlending, NearestFilter, LinearFilter,
+    Matrix4, Vector3
 } from 'three'
 
 import '../shader/Image.vert'
@@ -27,9 +28,9 @@ const quadUvs = new Float32Array([
   1, 0
 ])
 
-type ImageFilterTypes = 'nearest'|'linear'|'cubic-bspline'|'cubic-catmulrom'|'cubic-mitchell'
+export type ImageFilterTypes = 'nearest'|'linear'|'cubic-bspline'|'cubic-catmulrom'|'cubic-mitchell'
 
-interface ImageBufferData {
+export interface ImageBufferData {
   position: Float32Array
   imageData: Float32Array
   width: number
@@ -38,13 +39,13 @@ interface ImageBufferData {
   picking?: Picker
 }
 
-const ImageBufferDefaultParameters = Object.assign({
+export const ImageBufferDefaultParameters = Object.assign({
   filter: 'nearest' as ImageFilterTypes,
   forceTransparent: true
 }, BufferDefaultParameters)
-type ImageBufferParameters = typeof ImageBufferDefaultParameters
+export type ImageBufferParameters = typeof ImageBufferDefaultParameters
 
-const ImageBufferParameterTypes = Object.assign({
+export const ImageBufferParameterTypes = Object.assign({
   filter: { updateShader: true, uniform: true }
 }, BufferParameterTypes)
 

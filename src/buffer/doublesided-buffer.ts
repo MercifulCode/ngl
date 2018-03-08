@@ -4,7 +4,7 @@
  * @private
  */
 
-import { Group, BufferGeometry, Object3D, Mesh, LineSegments } from 'three'
+import { BufferGeometry, Group, LineSegments, Mesh, Matrix4, Object3D, Vector3 } from 'three'
 
 import Buffer, { BufferSide } from './buffer'
 import { Picker } from '../utils/picker'
@@ -14,7 +14,7 @@ function setVisibilityFalse (m: Object3D) { m.visible = false }
 
 /**
  * A double-sided mesh buffer. Takes a buffer and renders the front and
- * the back as seperate objects to avoid some artifacts when rendering
+ * the back as separate objects to avoid some artifacts when rendering
  * transparent meshes. Also allows to render the back of a mesh opaque
  * while the front is transparent.
  * @implements {Buffer}

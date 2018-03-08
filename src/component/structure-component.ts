@@ -1,10 +1,11 @@
 /**
- * @file Sturucture Component
+ * @file Structure Component
  * @author Alexander Rose <alexander.rose@weirdbyte.de>
  * @private
  */
 
 import { Signal } from 'signals'
+import { Box3, Vector3 } from 'three';
 
 import { ComponentRegistry, MeasurementDefaultParams } from '../globals'
 import {
@@ -25,7 +26,7 @@ import Stage from '../stage/stage'
 import StructureRepresentation from '../representation/structure-representation'
 import AtomProxy from '../proxy/atom-proxy'
 
-type StructureRepresentationType = (
+export type StructureRepresentationType = (
   'angle'|'axes'|'backbone'|'ball+stick'|'base'|'cartoon'|'contact'|'dihedral'|
   'distance'|'helixorient'|'hyperball'|'label'|'licorice'|'line'|'surface'|
   'ribbon'|'rocket'|'rope'|'spacefill'|'trace'|'tube'|'unitcell'
@@ -37,7 +38,7 @@ export const StructureComponentDefaultParameters = Object.assign({
 }, ComponentDefaultParameters)
 export type StructureComponentParameters = typeof StructureComponentDefaultParameters
 
-interface StructureComponentSignals extends ComponentSignals {
+export interface StructureComponentSignals extends ComponentSignals {
   trajectoryAdded: Signal  // when a trajectory is added
   trajectoryRemoved: Signal  // when a trajectory is removed
   defaultAssemblyChanged: Signal  // on default assembly change
@@ -432,7 +433,7 @@ class StructureComponent extends Component {
   }
 }
 
-const enum MeasurementFlags {
+export const enum MeasurementFlags {
   Distance = 0x1,
   Angle = 0x2,
   Dihedral = 0x4

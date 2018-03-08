@@ -16,7 +16,7 @@ import { Signal } from 'signals'
  * @type {Integer}
  */
 
-interface CounterSignals {
+export interface CounterSignals {
   countChanged: Signal
 }
 

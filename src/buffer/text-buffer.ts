@@ -4,7 +4,7 @@
  * @private
  */
 
-import { Color, CanvasTexture } from 'three'
+import { Color, CanvasTexture, Matrix4, Vector3 } from 'three'
 
 import '../shader/SDFFont.vert'
 import '../shader/SDFFont.frag'
@@ -31,7 +31,7 @@ type TextStyles = 'normal'|'italic'
 type TextVariants = 'normal'
 type TextWeights = 'normal'|'bold'
 
-const TextAtlasDefaultParams = {
+export const TextAtlasDefaultParams = {
   font: 'sans-serif' as TextFonts,
   size: 36,
   style: 'normal' as TextStyles,
@@ -41,11 +41,11 @@ const TextAtlasDefaultParams = {
   width: 1024,
   height: 1024
 }
-type TextAtlasParams = typeof TextAtlasDefaultParams
+export type TextAtlasParams = typeof TextAtlasDefaultParams
 
-type TextAtlasMap = { x: number, y: number, w: number, h: number }
+export type TextAtlasMap = { x: number, y: number, w: number, h: number }
 
-class TextAtlas {
+export class TextAtlas {
   parameters: TextAtlasParams
 
   gamma = 1
@@ -278,14 +278,14 @@ class TextAtlas {
  * @property {Boolean} fixedSize - show text with a fixed pixel size
  */
 
-interface TextBufferData extends BufferData {
+export interface TextBufferData extends BufferData {
   size: Float32Array
   text: string[]
 }
 
-type TextAttachments = 'bottom-left'|'bottom-center'|'bottom-right'|'middle-left'|'middle-center'|'middle-right'|'top-left'|'top-center'|'top-right'
+export type TextAttachments = 'bottom-left'|'bottom-center'|'bottom-right'|'middle-left'|'middle-center'|'middle-right'|'top-left'|'top-center'|'top-right'
 
-const TextBufferDefaultParameters = Object.assign({
+export const TextBufferDefaultParameters = Object.assign({
   fontFamily: 'sans-serif' as TextFonts,
   fontStyle: 'normal' as TextStyles,
   fontWeight: 'bold' as TextWeights,
@@ -306,7 +306,7 @@ const TextBufferDefaultParameters = Object.assign({
 }, BufferDefaultParameters)
 export type TextBufferParameters = typeof TextBufferDefaultParameters
 
-const TextBufferParameterTypes = Object.assign({
+export const TextBufferParameterTypes = Object.assign({
   fontFamily: { uniform: true },
   fontStyle: { uniform: true },
   fontWeight: { uniform: true },

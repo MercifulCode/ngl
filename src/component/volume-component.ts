@@ -4,12 +4,15 @@
  * @private
  */
 
+import { Box3, Vector3 } from 'three';
+
 import { ComponentRegistry } from '../globals'
 import Component, { ComponentParameters } from './component'
 import Stage from '../stage/stage'
 import Volume from '../surface/volume'
+import RepresentationElement from './representation-element';
 
-type VolumeRepresentationType = 'surface'|'slice'|'dot'
+export type VolumeRepresentationType = 'surface'|'slice'|'dot'
 
 /**
  * Component wrapping a {@link Volume} object
@@ -40,7 +43,7 @@ class VolumeComponent extends Component {
   /**
    * Add a new volume representation to the component
    */
-  addRepresentation (type: VolumeRepresentationType, params: { [k: string]: any } = {}) {
+  addRepresentation (type: VolumeRepresentationType, params: { [k: string]: any } = {}): RepresentationElement {
     return this._addRepresentation(type, this.volume, params)
   }
 

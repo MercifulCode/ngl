@@ -8,7 +8,11 @@ import { Vector3, Box3 } from 'three'
 
 import { Debug, Log } from '../globals'
 import Structure from './structure'
+import Validation from './validation'
+
 import Selection from '../selection/selection'
+
+import { SpatialHash } from '../ngl'
 import BitArray from '../utils/bitarray'
 
 import BondProxy from '../proxy/bond-proxy'
@@ -17,6 +21,18 @@ import ResidueProxy from '../proxy/residue-proxy'
 import ChainProxy from '../proxy/chain-proxy'
 import ModelProxy from '../proxy/model-proxy'
 
+import BondStore from '../store/bond-store'
+import AtomStore from '../store/atom-store'
+import ResidueStore from '../store/residue-store'
+import ChainStore from '../store/chain-store'
+import ModelStore from '../store/model-store'
+import AtomMap from '../store/atom-map'
+import ResidueMap from '../store/residue-map'
+import BondHash from '../store/bond-hash'
+import { Data } from './data'
+import Entity from './entity'
+import Unitcell from '../symmetry/unitcell'
+import Assembly from '../symmetry/assembly'
 /**
  * Get view on structure restricted to the selection
  * @param  {Selection} selection - the selection
@@ -69,25 +85,25 @@ class StructureView extends Structure {
   get path () { return this.structure.path }
   get title () { return this.structure.title }
   get id () { return this.structure.id }
-  get data () { return this.structure.data }
+  get data (): Data { return this.structure.data }
   get atomSetDict () { return this.structure.atomSetDict }
   get biomolDict () { return this.structure.biomolDict }
-  get entityList () { return this.structure.entityList }
-  get unitcell () { return this.structure.unitcell }
+  get entityList (): Entity[] { return this.structure.entityList }
+  get unitcell (): Unitcell | undefined { return this.structure.unitcell }
   get frames () { return this.structure.frames }
   get boxes () { return this.structure.boxes }
-  get validation () { return this.structure.validation }
-  get bondStore () { return this.structure.bondStore }
-  get backboneBondStore () { return this.structure.backboneBondStore }
-  get rungBondStore () { return this.structure.rungBondStore }
-  get atomStore () { return this.structure.atomStore }
-  get residueStore () { return this.structure.residueStore }
-  get chainStore () { return this.structure.chainStore }
-  get modelStore () { return this.structure.modelStore }
-  get atomMap () { return this.structure.atomMap }
-  get residueMap () { return this.structure.residueMap }
-  get bondHash () { return this.structure.bondHash }
-  get spatialHash () { return this.structure.spatialHash }
+  get validation (): Validation | undefined { return this.structure.validation }
+  get bondStore (): BondStore { return this.structure.bondStore }
+  get backboneBondStore (): BondStore { return this.structure.backboneBondStore }
+  get rungBondStore (): BondStore { return this.structure.rungBondStore }
+  get atomStore (): AtomStore { return this.structure.atomStore }
+  get residueStore (): ResidueStore { return this.structure.residueStore }
+  get chainStore (): ChainStore { return this.structure.chainStore }
+  get modelStore (): ModelStore { return this.structure.modelStore }
+  get atomMap (): AtomMap { return this.structure.atomMap }
+  get residueMap (): ResidueMap { return this.structure.residueMap }
+  get bondHash (): BondHash | undefined { return this.structure.bondHash }
+  get spatialHash (): SpatialHash | undefined { return this.structure.spatialHash }
 
   get _hasCoords () { return this.structure._hasCoords }
   set _hasCoords (value) { this.structure._hasCoords = value }

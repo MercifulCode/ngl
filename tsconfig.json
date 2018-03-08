@@ -1,16 +1,17 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "alwaysStrict": true,
-        "noImplicitAny": true,
-        "noImplicitThis": true,
-        "sourceMap": false,
-        "noUnusedLocals": true,
-        "strictNullChecks": true,
-        "lib": [ "es6", "DOM", "es2016" ],
-        "outDir": "build/js",
-        "allowJs": true,
-        "moduleResolution": "node"
-    },
-    "include": [ "src/**/*", "lib/**/*" ]
+  "compilerOptions": {
+    "target": "es6",
+    "declaration": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "sourceMap": false,
+    "noUnusedLocals": false,
+    "strictNullChecks": true,
+    "lib": ["es6", "DOM", "es2016"],
+    "outDir": "build/js",
+    "allowJs": false,
+    "moduleResolution": "node",
+  },
+  "include": ["src/**/*", "lib/**/*", "node_modules/@types/three"]
 }

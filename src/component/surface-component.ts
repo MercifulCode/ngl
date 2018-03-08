@@ -4,12 +4,15 @@
  * @private
  */
 
+import { Box3, Vector3 } from 'three';
+
 import { ComponentRegistry } from '../globals'
 import Component, { ComponentParameters } from './component'
 import Stage from '../stage/stage'
 import Surface from '../surface/surface'
+import RepresentationElement from './representation-element';
 
-type SurfaceRepresentationType = 'surface'|'dot'
+export type SurfaceRepresentationType = 'surface'|'dot'
 
 /**
  * Component wrapping a {@link Surface} object
@@ -45,7 +48,7 @@ class SurfaceComponent extends Component {
    * @return {RepresentationComponent} the created representation wrapped into
    *                                   a representation component object
    */
-  addRepresentation (type: SurfaceRepresentationType, params: { [k: string]: any } = {}) {
+  addRepresentation (type: SurfaceRepresentationType, params: { [k: string]: any } = {}): RepresentationElement {
     return this._addRepresentation(type, this.surface, params)
   }
 

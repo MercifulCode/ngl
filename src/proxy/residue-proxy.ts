@@ -15,15 +15,20 @@ import {
 
 import Structure from '../structure/structure'
 import Selection from '../selection/selection'
+import Entity from '../structure/entity'
+import { ResidueBonds } from '../structure/structure-utils';
 
 import ChainStore from '../store/chain-store'
 import ResidueStore from '../store/residue-store'
 import AtomStore from '../store/atom-store'
+import ResidueType, { RingData } from '../store/residue-type';
+import AtomType from '../store/atom-type';
 
 import AtomMap from '../store/atom-map'
 import ResidueMap from '../store/residue-map'
 
 import AtomProxy from '../proxy/atom-proxy'
+import ChainProxy from '../proxy/chain-proxy'
 
 /**
  * Residue proxy

@@ -5,7 +5,7 @@
  */
 
 import { Vector3, Matrix4, Quaternion } from 'three'
-import { Signal } from 'signals'
+import * as signals from 'signals';
 
 import { ensureVector3 } from '../utils'
 import Component from '../component/component'
@@ -21,7 +21,7 @@ const tmpRotateQuaternion = new Quaternion()
  */
 class ComponentControls {
   signals = {
-    changed: new Signal()
+    changed: new signals.Signal()
   }
 
   stage: Stage

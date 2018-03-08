@@ -14,7 +14,7 @@ import { copyArray } from '../math/array-utils'
 import { projectPointOnVector } from '../math/vector-utils'
 import Polymer from '../proxy/polymer'
 
-interface Iterator {
+export interface Iterator {
   size: number
   next: () => Vector3
   get: (idx: number) => Vector3

@@ -4,7 +4,7 @@
  * @private
  */
 
-import { Box3, Vector3, Color } from 'three'
+import { Box3, Vector3, Color, Matrix4 } from 'three'
 
 import { createParams, ensureFloat32Array, getUintArray } from '../utils'
 import {
@@ -19,13 +19,13 @@ import { TextBufferParameters } from '../buffer/text-buffer'
 
 const tmpBox = new Box3()
 
-const Primitives = [
+export const Primitives = [
   ArrowPrimitive, BoxPrimitive, ConePrimitive, CylinderPrimitive,
   EllipsoidPrimitive, OctahedronPrimitive, SpherePrimitive, TetrahedronPrimitive,
   TextPrimitive, TorusPrimitive, PointPrimitive, WidelinePrimitive
 ]
 
-const ShapeDefaultParameters = {
+export const ShapeDefaultParameters = {
   aspectRatio: 1.5,
   sphereDetail: 2,
   radialSegments: 50,
@@ -38,7 +38,7 @@ const ShapeDefaultParameters = {
   useTexture: true,
   lineWidth: 2
 }
-type ShapeParameters = typeof ShapeDefaultParameters
+export type ShapeParameters = typeof ShapeDefaultParameters
 
 /**
  * Class for building custom shapes.

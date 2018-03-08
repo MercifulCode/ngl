@@ -26,13 +26,13 @@ function entityTypeFromString (string: string) {
   }
 }
 
-const EntityTypeString = {
+export const EntityTypeString = {
   'polymer': PolymerEntity,
   'non-polymer': NonPolymerEntity,
   'macrolide': MacrolideEntity,
   'water': WaterEntity,
 }
-type EntityTypeString = keyof typeof EntityTypeString
+export type EntityTypeString = keyof typeof EntityTypeString
 
 /**
  * Entity of a {@link Structure}

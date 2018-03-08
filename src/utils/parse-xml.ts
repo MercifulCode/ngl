@@ -7,8 +7,8 @@
 // https://github.com/segmentio/xml-parser
 // MIT license
 
-type Attributes = { [k: string]: any }
-interface Node {
+export type Attributes = { [k: string]: any }
+export interface Node {
   name?: string
   content?: string
   attributes: Attributes

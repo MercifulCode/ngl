@@ -14,7 +14,7 @@ import {
 import { UnitcellPicker } from '../utils/picker'
 import Structure from '../structure/structure'
 
-interface UnitcellParams {
+export interface UnitcellParams {
   a: number
   b: number
   c: number
@@ -25,7 +25,7 @@ interface UnitcellParams {
   cartToFrac?: Matrix4
 }
 
-const DefaultBoxParams = {
+export const DefaultBoxParams = {
   a: 1,
   b: 1,
   c: 1,
@@ -35,7 +35,7 @@ const DefaultBoxParams = {
   spacegroup: 'P 1'
 }
 
-interface UnitcellDataParams {
+export interface UnitcellDataParams {
   colorValue?: string|number,
   radius?: number
 }

@@ -15,15 +15,21 @@ import {
 } from '../structure/structure-constants'
 
 import Structure from '../structure/structure'
+import Entity from '../structure/entity'
 
 import ChainStore from '../store/chain-store'
 import ResidueStore from '../store/residue-store'
 import AtomStore from '../store/atom-store'
 
+import BondHash from '../store/bond-hash'
+import ResidueType from '../store/residue-type'
+import AtomType from '../store/atom-type'
+
 import AtomMap from '../store/atom-map'
 import ResidueMap from '../store/residue-map'
 
 import BondProxy from '../proxy/bond-proxy'
+import ResidueProxy from '../proxy/residue-proxy'
 
 /**
  * Atom proxy
@@ -57,7 +63,7 @@ class AtomProxy {
   get bondHash () { return this.structure.bondHash }
 
   /**
-   * Molecular enity
+   * Molecular entity
    * @type {Entity}
    */
   get entity () {

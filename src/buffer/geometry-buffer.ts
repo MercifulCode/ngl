@@ -4,7 +4,7 @@
  * @private
  */
 
-import { Matrix4, Matrix3, BufferGeometry } from 'three'
+import { Matrix4, Matrix3, BufferGeometry, Vector3 } from 'three'
 
 import { getUintArray } from '../utils'
 import { serialBlockArray } from '../math/array-utils.js'

@@ -45,7 +45,7 @@ import ResidueProxy from '../proxy/residue-proxy'
 import ChainProxy from '../proxy/chain-proxy'
 import ModelProxy from '../proxy/model-proxy'
 
-interface Structure {
+export interface IStructure {
   signals: StructureSignals
 
   name: string
@@ -108,7 +108,7 @@ interface Structure {
   _cp: ChainProxy
 }
 
-type StructureHeader = {
+export type StructureHeader = {
   releaseDate?: string
   depositionDate?: string
   resolution?: number
@@ -117,19 +117,62 @@ type StructureHeader = {
   experimentalMethods?: string[]
 }
 
-type StructureExtraData = {
+export type StructureExtraData = {
   cif?: object
   sdf?: object[]
 }
 
-type StructureSignals = {
+export type StructureSignals = {
   refreshed: Signal
 }
 
 /**
  * Structure
  */
-class Structure implements Structure{
+class Structure implements IStructure{
+  name: string;
+  path: string;
+  title: string;
+  id: string;
+  data: Data;
+  atomCount: number;
+  bondCount: number;
+  header: StructureHeader;
+  extraData: StructureExtraData;
+  atomSetCache: { [k: string]: BitArray; };
+  atomSetDict: { [k: string]: BitArray; };
+  biomolDict: { [k: string]: Assembly; };
+  entityList: Entity[];
+  unitcell?: Unitcell | undefined;
+  frames: Float32Array[];
+  boxes: Float32Array[];
+  validation?: Validation | undefined;
+  bondStore: BondStore;
+  backboneBondStore: BondStore;
+  rungBondStore: BondStore;
+  atomStore: AtomStore;
+  residueStore: ResidueStore;
+  chainStore: ChainStore;
+  modelStore: ModelStore;
+  atomMap: AtomMap;
+  residueMap: ResidueMap;
+  bondHash?: BondHash | undefined;
+  spatialHash?: SpatialHash | undefined;
+  atomSet?: BitArray | undefined;
+  bondSet?: BitArray | undefined;
+  center: Vector3;
+  boundingBox: Box3;
+  trajectory?: { name: string; frame: number; } | undefined;
+  
+  getView(selection: Selection): StructureView {
+    throw new Error("Method not implemented.");
+  }
+  
+  _hasCoords?: boolean | undefined;
+  _bp: BondProxy;
+  _ap: AtomProxy;
+  _rp: ResidueProxy;
+  _cp: ChainProxy;
   signals: StructureSignals = {
     refreshed: new Signal()
   }

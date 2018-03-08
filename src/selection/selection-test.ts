@@ -12,9 +12,9 @@ import ResidueProxy from '../proxy/residue-proxy'
 import ChainProxy from '../proxy/chain-proxy'
 import ModelProxy from '../proxy/model-proxy'
 
-type ProxyEntity = AtomProxy|ResidueProxy|ChainProxy|ModelProxy
-type TestEntityFn = (e: ProxyEntity, s: SelectionRule) => boolean|-1
-type FilterFn = (s: SelectionRule) => boolean
+export type ProxyEntity = AtomProxy|ResidueProxy|ChainProxy|ModelProxy
+export type TestEntityFn = (e: ProxyEntity, s: SelectionRule) => boolean|-1
+export type FilterFn = (s: SelectionRule) => boolean
 export type SelectionTest = false|((e: ProxyEntity) => boolean|-1)
 
 export type SelectionOperator = 'AND'|'OR'
