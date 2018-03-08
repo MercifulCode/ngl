@@ -15,7 +15,7 @@ import IOBuffer from './io-buffer.js'
  * @param {boolean} statement - Throws if true
  * @param {string} reason - Reason to throw
  */
-function notNetcdf (statement, reason) {
+function notNetcdf (statement: boolean, reason: string) {
   if (statement) {
     throw new TypeError('Not a valid NetCDF v3.x file: ' + reason)
   }
@@ -26,7 +26,7 @@ function notNetcdf (statement, reason) {
  * @ignore
  * @param {IOBuffer} buffer - Buffer for the file data
  */
-function padding (buffer) {
+function padding (buffer: IOBuffer) {
   if ((buffer.offset % 4) !== 0) {
     buffer.skip(4 - (buffer.offset % 4))
   }
@@ -38,7 +38,7 @@ function padding (buffer) {
  * @param {IOBuffer} buffer - Buffer for the file data
  * @return {string} - Name
  */
-function readName (buffer) {
+function readName (buffer: any) {
   // Read name
   const nameLength = buffer.readUint32()
   const name = buffer.readChars(nameLength)
@@ -66,7 +66,7 @@ const types = {
  * @param {number} type - integer that represents the type
  * @return {string} - parsed value of the type
  */
-function num2str (type) {
+function num2str (type: any) {
   switch (Number(type)) {
     case types.BYTE:
       return 'byte'
@@ -91,7 +91,7 @@ function num2str (type) {
  * @param {number} type - integer that represents the type
  * @return {number} -size of the type
  */
-function num2bytes (type) {
+function num2bytes (type: number) {
   switch (Number(type)) {
     case types.BYTE:
       return 1
@@ -116,7 +116,7 @@ function num2bytes (type) {
  * @param {string} type - string that represents the type
  * @return {number} - parsed value of the type
  */
-function str2num (type) {
+function str2num (type: any) {
   switch (String(type)) {
     case 'byte':
       return types.BYTE
@@ -142,7 +142,7 @@ function str2num (type) {
  * @param {function} bufferReader - Function to read next value
  * @return {Array<number>|number}
  */
-function readNumber (size, bufferReader) {
+function readNumber (size: any, bufferReader: any) {
   if (size !== 1) {
     const numbers = new Array(size)
     for (let i = 0; i < size; i++) {
@@ -162,7 +162,7 @@ function readNumber (size, bufferReader) {
  * @param {number} size - Size of the element to read
  * @return {string|Array<number>|number}
  */
-function readType (buffer, type, size) {
+function readType (buffer: any, type: any, size: any) {
   switch (type) {
     case types.BYTE:
       return buffer.readBytes(size)
@@ -188,7 +188,7 @@ function readType (buffer, type, size) {
  * @param {string} value - String to trim
  * @return {string} - Trimmed string
  */
-function trimNull (value) {
+function trimNull (value: any) {
   if (value.charCodeAt(value.length - 1) === 0) {
     return value.substring(0, value.length - 1)
   }
@@ -204,7 +204,7 @@ function trimNull (value) {
  * @param {object} variable - Variable metadata
  * @return {Array} - Data of the element
  */
-function nonRecord (buffer, variable) {
+function nonRecord (buffer: any, variable: any) {
   // variable type
   const type = str2num(variable.type)
 
@@ -228,7 +228,7 @@ function nonRecord (buffer, variable) {
  * @param {object} recordDimension - Record dimension metadata
  * @return {Array} - Data of the element
  */
-function record (buffer, variable, recordDimension) {
+function record (buffer: any, variable: any, recordDimension: any) {
   // variable type
   const type = str2num(variable.type)
   const width = variable.size ? variable.size / num2bytes(type) : 1
@@ -267,10 +267,10 @@ const NC_ATTRIBUTE = 12
  *  * `globalAttributes`: List of global attributes
  *  * `variables`: List of variables
  */
-function header (buffer, version) {
+function header (buffer: IOBuffer, version: number): any {
   // Length of record dimension
   // sum of the varSize's of all the record variables.
-  const header = {recordDimension: {length: buffer.readUint32()}}
+  const header: any = {recordDimension: {length: buffer.readUint32()}}
 
   // Version
   header.version = version
@@ -300,7 +300,7 @@ function header (buffer, version) {
  *  * `name`: String with the name of the dimension
  *  * `size`: Number with the size of the dimension
  */
-function dimensionsList (buffer) {
+function dimensionsList (buffer: any): any {
   let dimensions, recordId, recordName
   const dimList = buffer.readUint32()
   if (dimList === ZERO) {
@@ -345,7 +345,7 @@ function dimensionsList (buffer) {
  *  * `type`: String with the type of the attribute
  *  * `value`: A number or string with the value of the attribute
  */
-function attributesList (buffer) {
+function attributesList (buffer: any) {
   let attributes
   const gAttList = buffer.readUint32()
   if (gAttList === ZERO) {
@@ -397,7 +397,7 @@ function attributesList (buffer) {
  *  * `offset`: Number with the offset where of the variable begins
  *  * `record`: True if is a record variable, false otherwise
  */
-function variablesList (buffer, recordId, version) {
+function variablesList (buffer: any, recordId: any, version: any): any {
   const varList = buffer.readUint32()
   let recordStep = 0
   let variables
@@ -474,10 +474,12 @@ function variablesList (buffer, recordId, version) {
  * https://www.unidata.ucar.edu/software/netcdf/docs/file_format_specifications.html
  */
 class NetcdfReader {
+  header: any;
+  buffer: IOBuffer;
   /**
    * @param {ArrayBuffer} data - ArrayBuffer or any Typed Array with the data
    */
-  constructor (data) {
+  constructor (data: number | ArrayBuffer | Int8Array | Int16Array | Int32Array | Uint8ClampedArray | Uint8Array | Uint16Array | Uint32Array | Float32Array | Float64Array) {
     const buffer = new IOBuffer(data)
     buffer.setBigEndian()
 
@@ -553,8 +555,8 @@ class NetcdfReader {
    * @param {string|object} variableName - Name of the variable to check
    * @return {Boolean} - Variable existence
    */
-  hasDataVariable (variableName) {
-    return this.header.variables.findIndex(function (val) {
+  hasDataVariable (variableName: string | object) {
+    return this.header.variables.findIndex(function (val: any) {
       return val.name === variableName
     }) !== -1
   }
@@ -562,13 +564,13 @@ class NetcdfReader {
   /**
    * Retrieves the data for a given variable
    * @param {string|object} variableName - Name of the variable to search or variable object
-   * @return {Array} - List with the variable values
+   * @return {A`rray} - List with the variable values
    */
-  getDataVariable (variableName) {
+  getDataVariable (variableName: string | object) {
     let variable
     if (typeof variableName === 'string') {
       // search the variable
-      variable = this.header.variables.find(function (val) {
+      variable = this.header.variables.find(function (val: any) {
         return val.name === variableName
       })
     } else {
