@@ -10,41 +10,21 @@ import { Debug, Log, ColormakerRegistry, ExtensionFragDepth } from '../globals'
 import { defaults } from '../utils'
 import Queue from '../utils/queue.js'
 import Counter from '../utils/counter.js'
+import { BufferParameters } from '../buffer/buffer';
+import Viewer from '../viewer/viewer';
+import { ScaleParameters } from '../color/colormaker';
 
-/**
- * Representation parameter object.
- * @typedef {Object} RepresentationParameters - representation parameters
- * @property {Boolean} [lazy] - only build & update the representation when visible
- *                            otherwise defer changes until set visible again
- * @property {Integer} [clipNear] - position of camera near/front clipping plane
- *                                in percent of scene bounding box
- * @property {Integer} [clipRadius] - radius of clipping sphere
- * @property {Vector3} [clipCenter] - position of for spherical clipping
- * @property {Boolean} [flatShaded] - render flat shaded
- * @property {Float} [opacity] - translucency: 1 is fully opaque, 0 is fully transparent
- * @property {Boolean} [depthWrite] - depth write
- * @property {String} [side] - which triangle sides to render, "front" front-side,
- *                            "back" back-side, "double" front- and back-side
- * @property {Boolean} [wireframe] - render as wireframe
- * @property {String} [colorScheme] - color scheme
- * @property {String} [colorScale] - color scale, either a string for a
- *                                 predefined scale or an array of
- *                                 colors to be used as the scale
- * @property {Boolean} [colorReverse] - reverse color scale
- * @property {Color} [colorValue] - color value
- * @property {Integer[]} [colorDomain] - scale value range
- * @property {Integer} colorDomain.0 - min value
- * @property {Integer} colorDomain.1 - max value
- * @property {String} [colorMode] - color mode, one of rgb, hsv, hsl, hsi, lab, hcl
- * @property {Float} [roughness] - how rough the material is, between 0 and 1
- * @property {Float} [metalness] - how metallic the material is, between 0 and 1
- * @property {Color} [diffuse] - diffuse color for lighting
- * @property {Color} [diffuseInterior] - diffuse interior, i.e. ignore normal
- * @property {Color} [useInteriorColor] - use interior color
- * @property {Color} [interiorColor] - interior color
- * @property {Color} [interiorDarkening] - interior darkening: 0 no darking, 1 fully darkened
- * @property {Boolean} [disablePicking] - disable picking
- */
+export type quality = 'auto' | 'low' | 'medium' | 'high';
+
+export const RepresentationDefaultParameters = {
+  lazy: false, // only build & update the representation when visible otherwise defer changes until set visible again
+  colorScheme: '',
+  'colorDomain.0': 0,
+  'colorDomain.1': 1,
+  quality: 'auto' as quality,
+  visible: true,
+}
+export type RepresentationParameters = typeof RepresentationDefaultParameters & BufferParameters & ScaleParameters & { [k: string]: any };
 
 /**
  * Representation object
@@ -53,197 +33,97 @@ import Counter from '../utils/counter.js'
  * @param {Viewer} viewer - a viewer object
  * @param {RepresentationParameters} [params] - representation parameters
  */
-class Representation {
-  constructor (object, viewer, params) {
-    // eslint-disable-next-line no-unused-vars
-    const p = params || {}
+abstract class Representation {
+  /**
+   * Counter that keeps track of tasks related to the creation of
+   * the representation, including surface calculations.
+   * @type {Counter}
+   */
+  public tasks: Counter;
+  public lazy: boolean;
+  public lazyProps = {
+    build: false,
+    bufferParams: {},
+    what: {}
+  };
+  public quality: quality;
+  public visible: boolean;
+  
+  private disposed: boolean = false;
+  private bufferList: any[];
+  private queue: Queue<any>;
 
-    this.type = ''
-
-    this.parameters = {
-
-      lazy: {
-        type: 'boolean'
-      },
-
-      clipNear: {
-        type: 'range', step: 1, max: 100, min: 0, buffer: true
-      },
-      clipRadius: {
-        type: 'number', precision: 1, max: 1000, min: 0, buffer: true
-      },
-      clipCenter: {
-        type: 'vector3', precision: 1, buffer: true
-      },
-      flatShaded: {
-        type: 'boolean', buffer: true
-      },
-      opacity: {
-        type: 'range', step: 0.01, max: 1, min: 0, buffer: true
-      },
-      depthWrite: {
-        type: 'boolean', buffer: true
-      },
-      side: {
-        type: 'select',
-        buffer: true,
-        options: { front: 'front', back: 'back', double: 'double' }
-      },
-      wireframe: {
-        type: 'boolean', buffer: true
-      },
-
-      colorScheme: {
-        type: 'select',
-        update: 'color',
-        options: {}
-      },
-      colorScale: {
-        type: 'select',
-        update: 'color',
-        options: ColormakerRegistry.getScales()
-      },
-      colorReverse: {
-        type: 'boolean', update: 'color'
-      },
-      colorValue: {
-        type: 'color', update: 'color'
-      },
-      colorDomain: {
-        type: 'hidden', update: 'color'
-      },
-      colorMode: {
-        type: 'select',
-        update: 'color',
-        options: ColormakerRegistry.getModes()
-      },
-
-      roughness: {
-        type: 'range', step: 0.01, max: 1, min: 0, buffer: true
-      },
-      metalness: {
-        type: 'range', step: 0.01, max: 1, min: 0, buffer: true
-      },
-      diffuse: {
-        type: 'color', buffer: true
-      },
-
-      diffuseInterior: {
-        type: 'boolean', buffer: true
-      },
-      useInteriorColor: {
-        type: 'boolean', buffer: true
-      },
-      interiorColor: {
-        type: 'color', buffer: true
-      },
-      interiorDarkening: {
-        type: 'range', step: 0.01, max: 1, min: 0, buffer: true
-      },
-
-      matrix: {
-        type: 'hidden', buffer: true
-      },
-
-      disablePicking: {
-        type: 'boolean', rebuild: true
-      }
-
-    }
-
-    /**
-     * @type {Viewer}
-     */
-    this.viewer = viewer
-
-    /**
-     * Counter that keeps track of tasks related to the creation of
-     * the representation, including surface calculations.
-     * @type {Counter}
-     */
-    this.tasks = new Counter()
-
-    /**
-     * @type {Queue}
-     * @private
-     */
-    this.queue = new Queue(this.make.bind(this))
-
-    /**
-     * @type {Array}
-     * @private
-     */
-    this.bufferList = []
+  constructor (object, readonly viewer: Viewer, readonly parameters: Partial<RepresentationParameters> = {}) {
 
     if (this.parameters.colorScheme) {
       this.parameters.colorScheme.options = ColormakerRegistry.getSchemes()
     }
   }
 
-  init (params) {
+  init (params: RepresentationParameters) {
     const p = params || {}
 
-    this.clipNear = defaults(p.clipNear, 0)
-    this.clipRadius = defaults(p.clipRadius, 0)
-    this.clipCenter = defaults(p.clipCenter, new Vector3())
-    this.flatShaded = defaults(p.flatShaded, false)
-    this.side = defaults(p.side, 'double')
-    this.opacity = defaults(p.opacity, 1.0)
-    this.depthWrite = defaults(p.depthWrite, true)
-    this.wireframe = defaults(p.wireframe, false)
+    this.parameters.clipNear = defaults(p.clipNear, 0)
+    this.parameters.clipRadius = defaults(p.clipRadius, 0)
+    this.parameters.clipCenter = defaults(p.clipCenter, new Vector3())
+    this.parameters.flatShaded = defaults(p.flatShaded, false)
+    this.parameters.side = defaults(p.side, 'double')
+    this.parameters.opacity = defaults(p.opacity, 1.0)
+    this.parameters.depthWrite = defaults(p.depthWrite, true)
+    this.parameters.wireframe = defaults(p.wireframe, false)
 
     this.setColor(p.color, p)
 
-    this.colorScheme = defaults(p.colorScheme, 'uniform')
-    this.colorScale = defaults(p.colorScale, '')
-    this.colorReverse = defaults(p.colorReverse, false)
-    this.colorValue = defaults(p.colorValue, 0x909090)
-    this.colorDomain = defaults(p.colorDomain, undefined)
-    this.colorMode = defaults(p.colorMode, 'hcl')
+    this.parameters.colorScheme = defaults(p.colorScheme, 'uniform')
+    this.parameters.scale = defaults(p.scale, '')
+    this.parameters.reverse = defaults(p.reverse, false)
+    this.parameters.value = defaults(p.value, 0x909090)
+    this.parameters.domain = defaults(p.domain, undefined)
+    this.parameters.mode = defaults(p.mode, 'hcl')
 
-    this.visible = defaults(p.visible, true)
-    this.quality = defaults(p.quality, undefined)
+    this.parameters.visible = defaults(p.visible, true)
+    this.parameters.quality = defaults(p.quality, undefined)
 
-    this.roughness = defaults(p.roughness, 0.4)
-    this.metalness = defaults(p.metalness, 0.0)
-    this.diffuse = defaults(p.diffuse, 0xffffff)
+    this.parameters.roughness = defaults(p.roughness, 0.4)
+    this.parameters.metalness = defaults(p.metalness, 0.0)
+    this.parameters.diffuse = defaults(p.diffuse, 0xffffff)
 
-    this.diffuseInterior = defaults(p.diffuseInterior, false)
-    this.useInteriorColor = defaults(p.useInteriorColor, false)
-    this.interiorColor = defaults(p.interiorColor, 0x222222)
-    this.interiorDarkening = defaults(p.interiorDarkening, 0)
+    this.parameters.diffuseInterior = defaults(p.diffuseInterior, false)
+    this.parameters.useInteriorColor = defaults(p.useInteriorColor, false)
+    this.parameters.interiorColor = defaults(p.interiorColor, 0x222222)
+    this.parameters.interiorDarkening = defaults(p.interiorDarkening, 0)
 
-    this.lazy = defaults(p.lazy, false)
+    this.parameters.lazy = defaults(p.lazy, false)
     this.lazyProps = {
       build: false,
       bufferParams: {},
       what: {}
     }
 
-    this.matrix = defaults(p.matrix, new Matrix4())
+    this.parameters.matrix = defaults(p.matrix, new Matrix4())
 
-    this.disablePicking = defaults(p.disablePicking, false)
+    this.parameters.disablePicking = defaults(p.disablePicking, false)
 
     // handle common parameters when applicable
 
     const tp = this.parameters
 
-    if (tp.sphereDetail === true) {
+    if (tp.sphereDetail) {
       tp.sphereDetail = {
         type: 'integer', max: 3, min: 0, rebuild: 'impostor'
       }
     }
-    if (tp.radialSegments === true) {
+    if (tp.radialSegments) {
       tp.radialSegments = {
         type: 'integer', max: 25, min: 5, rebuild: 'impostor'
       }
     }
-    if (tp.openEnded === true) {
+    if (tp.openEnded) {
       tp.openEnded = {
         type: 'boolean', rebuild: 'impostor', buffer: true
       }
     }
-    if (tp.disableImpostor === true) {
+    if (tp.disableImpostor) {
       tp.disableImpostor = {
         type: 'boolean', rebuild: true
       }
@@ -276,48 +156,49 @@ class Representation {
     }
   }
 
-  getColorParams (p) {
+  abstract get type (): string
+
+  getColorParams (p: RepresentationParameters): ScaleParameters {
     return Object.assign({
 
-      scheme: this.colorScheme,
-      scale: this.colorScale,
-      reverse: this.colorReverse,
-      value: this.colorValue,
-      domain: this.colorDomain,
-      mode: this.colorMode
+      scheme: this.parameters.colorScheme,
+      scale: this.parameters.scale,
+      reverse: this.parameters.reverse,
+      value: this.parameters.value,
+      domain: this.parameters.domain,
+      mode: this.parameters.mode,
+    }, p)
+  }
+
+  getBufferParams (p: RepresentationParameters): BufferParameters {
+    return Object.assign({
+
+      clipNear: this.parameters.clipNear,
+      clipRadius: this.parameters.clipRadius,
+      clipCenter: this.parameters.clipCenter,
+      flatShaded: this.parameters.flatShaded,
+      opacity: this.parameters.opacity,
+      depthWrite: this.parameters.depthWrite,
+      side: this.parameters.side,
+      wireframe: this.parameters.wireframe,
+
+      roughness: this.parameters.roughness,
+      metalness: this.parameters.metalness,
+      diffuse: this.parameters.diffuse,
+
+      diffuseInterior: this.parameters.diffuseInterior,
+      useInteriorColor: this.parameters.useInteriorColor,
+      interiorColor: this.parameters.interiorColor,
+      interiorDarkening: this.parameters.interiorDarkening,
+
+      matrix: this.parameters.matrix,
+
+      disablePicking: this.parameters.disablePicking
 
     }, p)
   }
 
-  getBufferParams (p) {
-    return Object.assign({
-
-      clipNear: this.clipNear,
-      clipRadius: this.clipRadius,
-      clipCenter: this.clipCenter,
-      flatShaded: this.flatShaded,
-      opacity: this.opacity,
-      depthWrite: this.depthWrite,
-      side: this.side,
-      wireframe: this.wireframe,
-
-      roughness: this.roughness,
-      metalness: this.metalness,
-      diffuse: this.diffuse,
-
-      diffuseInterior: this.diffuseInterior,
-      useInteriorColor: this.useInteriorColor,
-      interiorColor: this.interiorColor,
-      interiorDarkening: this.interiorDarkening,
-
-      matrix: this.matrix,
-
-      disablePicking: this.disablePicking
-
-    }, p)
-  }
-
-  setColor (value, p) {
+  setColor (value?: string | number | Color, p: RepresentationParameters) {
     const types = Object.keys(ColormakerRegistry.getSchemes())
 
     if (typeof value === 'string' && types.includes(value.toLowerCase())) {
@@ -348,12 +229,12 @@ class Representation {
     // this.bufferList.length = 0;
   }
 
-  update () {
-    this.build()
+  update (what?: any) {
+    this.build(what);
   }
 
-  build (updateWhat) {
-    if (this.lazy && (!this.visible || !this.opacity)) {
+  build (updateWhat?: any) {
+    if (this.parameters.lazy && (!this.visible || !this.parameters.opacity)) {
       this.lazyProps.build = true
       return
     }
@@ -375,7 +256,7 @@ class Representation {
     this.queue.push(updateWhat || false)
   }
 
-  make (updateWhat, callback) {
+  make (updateWhat?: any, callback?: (...args: any[]) => any) {
     if (Debug) Log.time('Representation.make ' + this.type)
 
     const _make = () => {
@@ -387,7 +268,7 @@ class Representation {
       } else {
         this.clear()
         this.create()
-        if (!this.manualAttach && !this.disposed) {
+        if (!this.disposed) {
           if (Debug) Log.time('Representation.attach ' + this.type)
           this.attach(() => {
             if (Debug) Log.timeEnd('Representation.attach ' + this.type)
@@ -407,7 +288,7 @@ class Representation {
     }
   }
 
-  attach (callback) {
+  attach (callback: () => void) {
     this.setVisibility(this.visible)
 
     callback()
@@ -419,10 +300,10 @@ class Representation {
    * @param {Boolean} [noRenderRequest] - whether or not to request a re-render from the viewer
    * @return {Representation} this object
    */
-  setVisibility (value, noRenderRequest) {
+  setVisibility (value: boolean, noRenderRequest: boolean) {
     this.visible = value
 
-    if (this.visible && this.opacity) {
+    if (this.visible && this.parameters.opacity) {
       const lazyProps = this.lazyProps
       const bufferParams = lazyProps.bufferParams
       const what = lazyProps.what
@@ -460,12 +341,12 @@ class Representation {
    * @param {Boolean} [rebuild] - whether or not to rebuild the representation
    * @return {Representation} this object
    */
-  setParameters (params, what = {}, rebuild = false) {
+  setParameters (params: RepresentationParameters, what = {}, rebuild = false) {
     const p = params || {}
     const tp = this.parameters
     const bufferParams = {}
 
-    if (!this.opacity && p.opacity !== undefined) {
+    if (!this.parameters.opacity && p.opacity !== undefined) {
       if (this.lazyProps.build) {
         this.lazyProps.build = false
         rebuild = true
@@ -533,7 +414,7 @@ class Representation {
     return this
   }
 
-  updateParameters (bufferParams = {}, what) {
+  updateParameters (bufferParams = {}, what: any) {
     if (this.lazy && (!this.visible || !this.opacity) && bufferParams.opacity === undefined) {
       Object.assign(this.lazyProps.bufferParams, bufferParams)
       Object.assign(this.lazyProps.what, what)
