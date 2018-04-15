@@ -114,14 +114,15 @@ class DoubleSidedBuffer {
   }
 
   getMesh (picking: boolean) {
-    let front, back
+    let front: LineSegments | Mesh;
+    let back: LineSegments | Mesh;
 
     if (picking) {
-      back = this.backBuffer.getPickingMesh()
-      front = this.frontBuffer.getPickingMesh()
+      back = this.backBuffer.getPickingMesh() as LineSegments | Mesh;
+      front = this.frontBuffer.getPickingMesh() as LineSegments | Mesh;
     } else {
-      back = this.backBuffer.getMesh()
-      front = this.frontBuffer.getMesh()
+      back = this.backBuffer.getMesh() as LineSegments | Mesh;
+      front = this.frontBuffer.getMesh() as LineSegments | Mesh;
     }
 
     this.frontMeshes.push(front)
