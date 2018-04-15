@@ -34,7 +34,7 @@ export interface RingData {
 /**
  * Residue type
  */
-export default class ResidueType {
+export class ResidueType {
   resname: string
   atomTypeIdList: number[]
   hetero: number
@@ -755,3 +755,5 @@ function RingFinderState(bonds: BondGraph, capacity: number): RingFinderState {
   }
   return state
 }
+
+export default ResidueType;

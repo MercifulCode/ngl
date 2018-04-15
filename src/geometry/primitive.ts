@@ -23,26 +23,26 @@ function addElement (elm: any, array: any[]) {
 
 const tmpVec = new Vector3()
 
-type PrimitiveFields = { [k: string]: string }
+export type PrimitiveFields = { [k: string]: string }
 
 /**
  * Base class for geometry primitives
  * @interface
  */
-abstract class Primitive {
-  static type = ''
-  static fields: PrimitiveFields = {}
+export class Primitive {
+  public type: string;
+  public fields: PrimitiveFields = {}
 
-  static get Picker () { return PickerRegistry.get(this.type) }
-  static get Buffer () { return BufferRegistry.get(this.type) }
+  public get Picker () { return PickerRegistry.get(this.type) }
+  public get Buffer () { return BufferRegistry.get(this.type) }
 
-  static getShapeKey (name: string) {
+  public getShapeKey (name: string) {
     return this.type + name[0].toUpperCase() + name.substr(1)
   }
 
-  static expandBoundingBox (box: Box3, data: any) {}
+  public expandBoundingBox (box: Box3, data: any) {}
 
-  static valueToShape (shape: Shape, name: string, value: any) {
+  public valueToShape (shape: Shape, name: string, value: any) {
     const data = shape._primitiveData[this.getShapeKey(name)]
     const type = this.fields[name]
 
@@ -56,7 +56,7 @@ abstract class Primitive {
     }
   }
 
-  static objectToShape (shape: Shape, data: any) {
+  public objectToShape (shape: Shape, data: any) {
     Object.keys(this.fields).forEach(name => {
       this.valueToShape(shape, name, data[name])
     })
@@ -64,7 +64,7 @@ abstract class Primitive {
     this.expandBoundingBox(shape.boundingBox, data)
   }
 
-  static valueFromShape (shape: Shape, pid: number, name: string) {
+  public valueFromShape (shape: Shape, pid: number, name: string) {
     const data = shape._primitiveData[this.getShapeKey(name)]
     const type = this.fields[name]
 
@@ -78,7 +78,7 @@ abstract class Primitive {
     }
   }
 
-  static objectFromShape (shape: Shape, pid: number) {
+  public objectFromShape (shape: Shape, pid: number) {
     let name = this.valueFromShape(shape, pid, 'name')
     if (name === undefined) {
       name = `${this.type}: ${pid} (${shape.name})`
@@ -92,7 +92,7 @@ abstract class Primitive {
     return o
   }
 
-  static arrayFromShape (shape: Shape, name: string) {
+  public arrayFromShape (shape: Shape, name: string) {
     const data = shape._primitiveData[this.getShapeKey(name)]
     const type = this.fields[name]
 
@@ -104,7 +104,7 @@ abstract class Primitive {
     }
   }
 
-  static dataFromShape (shape: Shape) {
+  public dataFromShape (shape: Shape) {
     const data: any = {}
 
     if (this.Picker) {
@@ -118,8 +118,12 @@ abstract class Primitive {
     return data
   }
 
-  static bufferFromShape (shape: Shape, params: any) {
+  public bufferFromShape (shape: Shape, params: any) {
     return new this.Buffer(this.dataFromShape(shape), params)
+  }
+
+  public positionFromShape (shape: Shape, pid: number) {
+    return this.valueFromShape(shape, pid, 'position')
   }
 }
 
@@ -127,19 +131,19 @@ abstract class Primitive {
  * Sphere geometry primitive
  */
 export class SpherePrimitive extends Primitive {
-  static type = 'sphere'
+  public type = 'sphere'
 
-  static fields = {
+  public fields = {
     position: 'v3',
     color: 'c',
     radius: 'f'
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     return this.valueFromShape(shape, pid, 'position')
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position))
   }
 }
@@ -148,9 +152,9 @@ export class SpherePrimitive extends Primitive {
  * Box geometry primitive
  */
 export class BoxPrimitive extends Primitive {
-  static type = 'box'
+  public type = 'box'
 
-  static fields = {
+  public fields = {
     position: 'v3',
     color: 'c',
     size: 'f',
@@ -158,11 +162,11 @@ export class BoxPrimitive extends Primitive {
     depthAxis: 'v3'
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     return this.valueFromShape(shape, pid, 'position')
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position))
   }
 }
@@ -171,41 +175,41 @@ export class BoxPrimitive extends Primitive {
  * Octahedron geometry primitive
  */
 export class OctahedronPrimitive extends BoxPrimitive {
-  static type = 'octahedron'
+  public type = 'octahedron'
 }
 
 /**
  * Tetrahedron geometry primitive
  */
 export class TetrahedronPrimitive extends BoxPrimitive {
-  static type = 'tetrahedron'
+  public type = 'tetrahedron'
 }
 
 /**
  * Cylinder geometry primitive
  */
 export class CylinderPrimitive extends Primitive {
-  static type = 'cylinder'
+  public type = 'cylinder'
 
-  static fields = {
+  public fields = {
     position1: 'v3',
     position2: 'v3',
     color: 'c',
     radius: 'f'
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     const p1 = this.valueFromShape(shape, pid, 'position1')
     const p2 = this.valueFromShape(shape, pid, 'position2')
     return p1.add(p2).multiplyScalar(0.5)
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position1))
     box.expandByPoint(tmpVec.fromArray(data.position2))
   }
 
-  static bufferFromShape (shape: Shape, params: any = {}) {
+  public bufferFromShape (shape: Shape, params: any = {}) {
     let data = this.dataFromShape(shape)
     if (this.type === 'cylinder' && params.dashedCylinder) {
       data = getFixedLengthDashData(data)
@@ -218,23 +222,23 @@ export class CylinderPrimitive extends Primitive {
  * Arrow geometry primitive
  */
 export class ArrowPrimitive extends CylinderPrimitive {
-  static type = 'arrow'
+  public type = 'arrow'
 }
 
 /**
  * Cone geometry primitive
  */
 export class ConePrimitive extends CylinderPrimitive {
-  static type = 'cone'
+  public type = 'cone'
 }
 
 /**
  * Ellipsoid geometry primitive
  */
 export class EllipsoidPrimitive extends SpherePrimitive {
-  static type = 'ellipsoid'
+  public type = 'ellipsoid'
 
-  static fields = {
+  public fields = {
     position: 'v3',
     color: 'c',
     radius: 'f',
@@ -247,27 +251,27 @@ export class EllipsoidPrimitive extends SpherePrimitive {
  * Torus geometry primitive
  */
 export class TorusPrimitive extends EllipsoidPrimitive {
-  static type = 'torus'
+  public type = 'torus'
 }
 
 /**
  * Text geometry primitive
  */
 export class TextPrimitive extends Primitive {
-  static type = 'text'
+  public type = 'text'
 
-  static fields = {
+  public fields = {
     position: 'v3',
     color: 'c',
     size: 'f',
     text: 's'
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     return this.valueFromShape(shape, pid, 'position')
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position))
   }
 }
@@ -276,18 +280,18 @@ export class TextPrimitive extends Primitive {
  * Point primitive
  */
 export class PointPrimitive extends Primitive {
-  static type = 'point'
+  public type = 'point'
 
-  static fields = {
+  public fields = {
     position: 'v3',
     color: 'c',
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     return this.valueFromShape(shape, pid, 'position')
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position))
   }
 }
@@ -296,21 +300,21 @@ export class PointPrimitive extends Primitive {
  * Wideline geometry primitive
  */
 export class WidelinePrimitive extends Primitive {
-  static type = 'wideline'
+  public type = 'wideline'
 
-  static fields = {
+  public fields = {
     position1: 'v3',
     position2: 'v3',
     color: 'c'
   }
 
-  static positionFromShape (shape: Shape, pid: number) {
+  public positionFromShape (shape: Shape, pid: number) {
     const p1 = this.valueFromShape(shape, pid, 'position1')
     const p2 = this.valueFromShape(shape, pid, 'position2')
     return p1.add(p2).multiplyScalar(0.5)
   }
 
-  static expandBoundingBox (box: Box3, data: any) {
+  public expandBoundingBox (box: Box3, data: any) {
     box.expandByPoint(tmpVec.fromArray(data.position1))
     box.expandByPoint(tmpVec.fromArray(data.position2))
   }

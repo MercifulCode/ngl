@@ -21,14 +21,19 @@ import ResidueStore from '../store/residue-store'
 import AtomStore from '../store/atom-store'
 
 import AtomMap from '../store/atom-map'
+import BondHash from '../store/bond-hash'
+
 import ResidueMap from '../store/residue-map'
 
 import BondProxy from '../proxy/bond-proxy'
+import { ResidueType } from '../store/residue-type';
+import AtomType from '../store/atom-type';
+import ResidueProxy from './residue-proxy';
 
 /**
  * Atom proxy
  */
-class AtomProxy {
+export class AtomProxy {
   index: number
 
   chainStore: ChainStore
@@ -54,7 +59,7 @@ class AtomProxy {
   /**
    * @type {BondHash}
    */
-  get bondHash () { return this.structure.bondHash }
+  get bondHash (): BondHash | undefined { return this.structure.bondHash }
 
   /**
    * Molecular enity
@@ -75,7 +80,7 @@ class AtomProxy {
   /**
    * @type {ResidueProxy}
    */
-  get residue () {
+  get residue (): ResidueProxy {
     console.warn('residue - might be expensive')
     return this.structure.getResidueProxy(this.residueIndex)
   }
@@ -130,13 +135,13 @@ class AtomProxy {
   /**
    * @type {ResidueType}
    */
-  get residueType () {
+  get residueType (): ResidueType {
     return this.residueMap.get(this.residueStore.residueTypeId[ this.residueIndex ])
   }
   /**
    * @type {AtomType}
    */
-  get atomType () {
+  get atomType (): AtomType {
     return this.atomMap.get(this.atomStore.atomTypeId[ this.index ])
   }
   get residueAtomOffset () {
@@ -646,7 +651,7 @@ class AtomProxy {
    * @param  {Vector3} [v] - target vector
    * @return {Vector3} target vector
    */
-  positionToVector3 (v: Vector3) {
+  positionToVector3 (v?: Vector3) {
     if (v === undefined) v = new Vector3()
 
     v.x = this.x

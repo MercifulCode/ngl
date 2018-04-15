@@ -7,7 +7,7 @@
 import BondStore from './bond-store'
 import { createAdjacencyList } from '../utils/adjacency-list'
 
-class BondHash {
+export class BondHash {
   countArray: Uint8Array
   offsetArray: Int32Array
   indexArray: Int32Array
